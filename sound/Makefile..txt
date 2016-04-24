@@ -1,0 +1,29 @@
+# Makefile for the Linux sound card driver
+;#1sound常用的音频设备的驱动程序===========;通过不同的总线实现的
+core               该目录包含了ALSA驱动的中间层，它是整个ALSA驱动的核心部分
+core/oss        包含模拟旧的OSS架构的PCM和Mixer模块
+core/seq        有关音序器相关的代码
+include          ALSA驱动的公共头文件目录，该目录的头文件需要导出给用户空间的应用程序使用，通常，驱动模块私有的头文件不应放置在这里
+drivers           放置一些与CPU、BUS架构无关的公用代码
+i2c                 ALSA自己的I2C控制代码
+pci                 pci声卡的顶层目录，子目录包含各种pci声卡的代码
+isa                 isa声卡的顶层目录，子目录包含各种isa声卡的代码
+soc                针对system-on-chip体系的中间层代码
+soc/codecs    针对soc体系的各种codec的代码，与平台无关
+
+obj-$(CONFIG_SOUND) += soundcore.o
+obj-$(CONFIG_SOUND_PRIME) += sound_firmware.o
+obj-$(CONFIG_SOUND_PRIME) += oss/
+obj-$(CONFIG_DMASOUND) += oss/
+obj-$(CONFIG_SND) += core/ i2c/ drivers/ isa/ pci/ ppc/ arm/ sh/ synth/ usb/ \
+	sparc/ spi/ parisc/ pcmcia/ mips/ soc/ atmel/
+obj-$(CONFIG_SND_AOA) += aoa/
+
+# This one must be compilable even if sound is configured out
+obj-$(CONFIG_AC97_BUS) += ac97_bus.o
+
+ifeq ($(CONFIG_SND),y)
+  obj-y += last.o
+endif
+
+soundcore-objs  := sound_core.o

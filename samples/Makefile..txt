@@ -1,0 +1,23 @@
+# Makefile for Linux samples code   1samples£¨ÄÚºË±àÒë·¶Àý£©
+;================================zjz================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;================================zjz================================
+obj-$(CONFIG_SAMPLES)	+= kobject/ kprobes/ tracepoints/ trace_events/ \
+			   hw_breakpoint/

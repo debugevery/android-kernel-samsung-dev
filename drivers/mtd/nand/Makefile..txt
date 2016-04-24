@@ -1,0 +1,137 @@
+#
+# linux/drivers/nand/Makefile
+#
+;================================zjz================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;================================zjz================================
+obj-$(CONFIG_MTD_NAND)			+= nand.o
+obj-$(CONFIG_MTD_NAND_ECC)		+= nand_ecc.o
+obj-$(CONFIG_MTD_NAND_IDS)		+= nand_ids.o
+obj-$(CONFIG_MTD_SM_COMMON) 		+= sm_common.o
+#================================================================zjz
+obj-$(CONFIG_MTD_NAND_CAFE)		+= cafe_nand.o
+obj-$(CONFIG_MTD_NAND_SPIA)		+= spia.o
+obj-$(CONFIG_MTD_NAND_AMS_DELTA)	+= ams-delta.o
+obj-$(CONFIG_MTD_NAND_AUTCPU12)		+= autcpu12.o
+obj-$(CONFIG_MTD_NAND_DENALI)		+= denali.o
+obj-$(CONFIG_MTD_NAND_EDB7312)		+= edb7312.o
+obj-$(CONFIG_MTD_NAND_AU1550)		+= au1550nd.o
+obj-$(CONFIG_MTD_NAND_BF5XX)		+= bf5xx_nand.o
+obj-$(CONFIG_MTD_NAND_PPCHAMELEONEVB)	+= ppchameleonevb.o
+obj-$(CONFIG_MTD_NAND_S3C2410)		+= s3c2410.o  #===================zjz
+obj-$(CONFIG_MTD_NAND_S3C)		+= s3c_nand.o 		#===================zjz
+obj-$(CONFIG_MTD_NAND_DAVINCI)		+= davinci_nand.o
+obj-$(CONFIG_MTD_NAND_DISKONCHIP)	+= diskonchip.o
+obj-$(CONFIG_MTD_NAND_H1900)		+= h1910.o
+obj-$(CONFIG_MTD_NAND_RTC_FROM4)	+= rtc_from4.o
+obj-$(CONFIG_MTD_NAND_SHARPSL)		+= sharpsl.o
+obj-$(CONFIG_MTD_NAND_NANDSIM)		+= nandsim.o
+obj-$(CONFIG_MTD_NAND_CS553X)		+= cs553x_nand.o
+obj-$(CONFIG_MTD_NAND_NDFC)		+= ndfc.o
+obj-$(CONFIG_MTD_NAND_ATMEL)		+= atmel_nand.o
+obj-$(CONFIG_MTD_NAND_GPIO)		+= gpio.o
+obj-$(CONFIG_MTD_NAND_OMAP2) 		+= omap2.o
+obj-$(CONFIG_MTD_NAND_CM_X270)		+= cmx270_nand.o
+obj-$(CONFIG_MTD_NAND_PXA3xx)		+= pxa3xx_nand.o
+obj-$(CONFIG_MTD_NAND_TMIO)		+= tmio_nand.o
+obj-$(CONFIG_MTD_NAND_PLATFORM)		+= plat_nand.o
+obj-$(CONFIG_MTD_ALAUDA)		+= alauda.o
+obj-$(CONFIG_MTD_NAND_PASEMI)		+= pasemi_nand.o
+obj-$(CONFIG_MTD_NAND_ORION)		+= orion_nand.o
+obj-$(CONFIG_MTD_NAND_FSL_ELBC)		+= fsl_elbc_nand.o
+obj-$(CONFIG_MTD_NAND_FSL_UPM)		+= fsl_upm.o
+obj-$(CONFIG_MTD_NAND_SH_FLCTL)		+= sh_flctl.o
+obj-$(CONFIG_MTD_NAND_MXC)		+= mxc_nand.o
+obj-$(CONFIG_MTD_NAND_SOCRATES)		+= socrates_nand.o
+obj-$(CONFIG_MTD_NAND_TXX9NDFMC)	+= txx9ndfmc.o
+obj-$(CONFIG_MTD_NAND_NUC900)		+= nuc900_nand.o
+obj-$(CONFIG_MTD_NAND_NOMADIK)		+= nomadik_nand.o
+obj-$(CONFIG_MTD_NAND_BCM_UMI)		+= bcm_umi_nand.o nand_bcm_umi.o
+obj-$(CONFIG_MTD_NAND_MPC5121_NFC)	+= mpc5121_nfc.o
+obj-$(CONFIG_MTD_NAND_RICOH)		+= r852.o
+
+nand-objs := nand_base.o nand_bbt.o
+
+
+如果想要在 Linux 下编写 Nand Flash 驱动，那么就先要搞清楚 Linux 下，
+关于此部分的整个框架。弄明白，系统是如何管理你的 nand flash 的，以
+及，系统都帮你做了那些准备工作，而剩下的，驱动底层实现部分，你要去
+实现哪些功能，才能使得硬件正常工作起来。
+
+【内存技术设备， MTD （ Memory Technology Device ）】 
+MTD ，是 Linux 的存储设备中的一个子系统。其设计此系统的目的是，对于内存类的设备，提供一个抽象层，一个接口，使得对于硬件驱动设计者来说，可以尽量少的去关心存储格式，比如 FTL ， FFS2 等，而只需要去提供最简单的底层硬件设备的读 / 写 / 擦除函数就可以了。而对于数据对于上层使用者来说是如何表示的，硬件驱动设计者可以不关心，而 MTD 存储设备子系统都帮你做好了。 
+对于 MTD 字系统的好处，简单解释就是，他帮助你实现了，很多对于以前或者其他系统来说，本来也是你驱动设计者要去实现的很多功能。换句话说，有了 MTD ，使得你设计 Nand Flash 的驱动，所要做的事情，要少很多很多，因为大部分工作，都由 MTD 帮你做好了。 
+当然，这个好处的一个“副作用”就是，使得我们不了解的人去理解整个 Linux 驱动架构，以及 MTD ，变得更加复杂。但是，总的说，觉得是利远远大于弊，否则，就不仅需要你理解，而且还是做更多的工作，实现更多的功能了。
+
+MTD ，将 nand flash ， nor flash 和其他类型的 flash 等设备，统一抽象成 MTD 设备来管理，根据这些设备的特点，上层实现了常见的操作函数封装，底层具体的内部实现，就需要驱动设计者自己来实现了。具体的内部硬件设备的读 / 写 / 擦除函数，那就是你必须实现的了。 
+
+==============================================
+移植uboot过程中 nand flash 驱动相关的一些资料分享
+1、基于优龙FS2410开发板u-boot-1.1.6的移植(NAND FLASH)
+
+http://blog.chinaunix.net/u2/74310/showart.php?id=1091929
+
+
+
+
+2、U-Boot中SMDK2410的NAND Flash驱动
+
+http://hi.baidu.com/liudefang888/blog/item/e618f151de5c1c2043a75be1.html
+
+
+
+
+3、uboot移植记录之二
+
+http://blog.chinaunix.net/u2/60011/showart_1005795.html
+
+
+
+
+4、移植Nand flash 驱动到u-boot-1.2.0
+
+http://www.52kaiyuan.com.cn/2009/0419/343.html
+
+
+
+
+5、u-boot移植到mini2440，u-boot版本2008.10
+
+http://blog.csdn.net/hugerat/archive/2009/01/21/3847025.aspx
+
+
+
+
+6、UBOOT中NAND操作
+
+http://blog.chinaunix.net/u2/63560/showart_509041.html
+
+
+
+
+7、移植U-Boot对nand flash支持（比较全了）
+
+http://www.linuxfans.org/bbs/thread-171087-1-1.html
+
+8、U-BOOT Nand 命令实现(一) （也比较全）
+
+http://blog.chinaunix.net/u1/47239/showart_376731.html
+
+

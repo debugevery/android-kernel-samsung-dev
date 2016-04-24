@@ -1,0 +1,42 @@
+#
+# Makefile for USB Core files and filesystem
+# 什么是usb core?她负责实现一些核心的功能,为别的设备驱动程序提供服务,比如申请内存,比
+如实现一些所有的设备都会需要的公共的函数.专门放一些核心的代码,比如初始化整个usb系统,
+初始化 root hub,初始化host controller的代码
+;================================zjz================================
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;================================zjz================================
+usbcore-objs	:= usb.o hub.o hcd.o urb.o message.o driver.o \
+			config.o file.o buffer.o sysfs.o endpoint.o \
+			devio.o notify.o generic.o quirks.o devices.o
+
+ifeq ($(CONFIG_PCI),y)
+	usbcore-objs	+= hcd-pci.o
+endif
+
+ifeq ($(CONFIG_USB_DEVICEFS),y)
+	usbcore-objs	+= inode.o
+endif
+
+obj-$(CONFIG_USB)	+= usbcore.o
+
+ifeq ($(CONFIG_USB_DEBUG),y)
+EXTRA_CFLAGS += -DDEBUG
+endif

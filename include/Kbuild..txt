@@ -1,0 +1,13 @@
+# Top-level Makefile calls into asm-$(ARCH)
+#1include头文件（与平台无关的头文件在include下linux子目录下，与平台有关的则在相应子目录下）
+# List only non-arch directories below
+
+header-y += asm-generic/
+header-y += linux/
+header-y += sound/
+header-y += mtd/
+header-y += rdma/
+header-y += video/
+header-y += drm/
+header-y += xen/
+header-y += scsi/

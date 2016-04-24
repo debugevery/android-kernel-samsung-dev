@@ -1,0 +1,46 @@
+#
+# Makefile for the kernel mmc core.#===================zjz
+#
+;================================zjz================================
+;主函数Core.c
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;================================zjz================================
+ifeq ($(CONFIG_MMC_DEBUG),y)
+	EXTRA_CFLAGS		+= -DDEBUG
+endif
+
+obj-$(CONFIG_MMC)		+= mmc_core.o
+mmc_core-y			:= core.o bus.o host.o \
+				   mmc.o mmc_ops.o sd.o sd_ops.o \
+				   sdio.o sdio_ops.o sdio_bus.o \
+				   sdio_cis.o sdio_io.o sdio_irq.o
+
+mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+
+
+
+ // core.c文件中实现了几个关键的函数，用来提供给上层MMC Card调用和对SD/MMC卡的侦测函数以及初始化。
+// 供给上层MMC Card调用主要有：
+//void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
+// int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries);
+// mmc card层就是通过这些函数来操作mmc/sd卡。而这些函数最终调用的是mmc_host_ops 结构体中的request函数来
+//进行具体的操作。
+// 
+// 对SD/MMC卡的侦测函数以及初始化，主要实现在
+//void mmc_rescan(struct work_struct *work); 函数中。
